@@ -15,12 +15,6 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-console.log(
-  "Firebase API key loaded:",
-  Boolean(import.meta.env.VITE_FIREBASE_API_KEY)
-);
-console.log("API key length:", firebaseConfig.apiKey?.length);
-console.log("API key starts with AIza:", firebaseConfig.apiKey?.startsWith("AIza"));
 const app = initializeApp(firebaseConfig);
 const auth=getAuth(app)
 export {app,auth}
