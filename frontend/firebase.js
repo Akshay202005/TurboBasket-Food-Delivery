@@ -15,6 +15,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+console.log(
+  "Firebase API key loaded:",
+  Boolean(import.meta.env.VITE_FIREBASE_API_KEY)
+);
 const app = initializeApp(firebaseConfig);
 const auth=getAuth(app)
 export {app,auth}
