@@ -52,7 +52,13 @@ return ()=>{
 
   return (
    <Routes>
-    <Route path='/signup' element={!userData?<SignUp/>:<Navigate to={"/"}/>}/>
+          {/* User Signup - default */}
+      <Route path='/signup' element={!userData?<SignUp role="user"/>:<Navigate to={"/"}/>}/>
+      {/* Owner Signup */}
+      <Route path='/owner/signup' element={!userData?<SignUp role="owner"/>:<Navigate to={"/"}/>}/>
+      {/* Delivery Boy Signup */}
+      <Route path='/delivery/signup' element={!userData?<SignUp role="deliveryBoy"/>:<Navigate to={"/"}/>}/>
+
     <Route path='/signin' element={!userData?<SignIn/>:<Navigate to={"/"}/>}/>
       <Route path='/forgot-password' element={!userData?<ForgotPassword/>:<Navigate to={"/"}/>}/>
       <Route path='/' element={userData?<Home/>:<Navigate to={"/signin"}/>}/>

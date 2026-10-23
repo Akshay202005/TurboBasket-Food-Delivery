@@ -15,12 +15,13 @@ import { useNavigate } from 'react-router-dom';
 import { serverUrl } from '../App';
 import { addMyOrder, setTotalAmount } from '../redux/userSlice';
 function RecenterMap({ location }) {
-  if (location.lat && location.lon) {
-    const map = useMap()
-    map.setView([location.lat, location.lon], 16, { animate: true })
-  }
+  const map = useMap()
+  useEffect(() => {
+    if (location?.lat && location?.lon) {
+      map.setView([location.lat, location.lon], 16, { animate: true })
+    }
+  }, [location, map])
   return null
-
 }
 
 function CheckOut() {
@@ -100,13 +101,30 @@ function CheckOut() {
     }
   }
 
-const openRazorpayWindow=(orderId,razorOrder)=>{
+const openRazorpayWindow=async (orderId,razorOrder)=>{
+
+  const res = await new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  if (!res) {
+    console.log("Razorpay SDK failed to load");
+    return;
+  }
 
   const options={
  key:import.meta.env.VITE_RAZORPAY_KEY_ID,
  amount:razorOrder.amount,
  currency:'INR',
- name:"Vingo",
+ name:"TurboBasket",
  description:"Food Delivery Website",
  order_id:razorOrder.id,
  handler:async function (response) {

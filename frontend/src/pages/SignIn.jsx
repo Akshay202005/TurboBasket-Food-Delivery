@@ -54,7 +54,7 @@ function SignIn() {
             <div className={`bg-white rounded-xl shadow-lg w-full max-w-md p-8 border-[1px] `} style={{
                 border: `1px solid ${borderColor}`
             }}>
-                <h1 className={`text-3xl font-bold mb-2 `} style={{ color: primaryColor }}>Vingo</h1>
+                <h1 className={`text-3xl font-bold mb-2 `} style={{ color: primaryColor }}>TurboBasket</h1>
                 <p className='text-gray-600 mb-8'> Sign In to your account to get started with delicious food deliveries
                 </p>
 
@@ -65,6 +65,7 @@ function SignIn() {
                     <label htmlFor="email" className='block text-gray-700 font-medium mb-1'>Email</label>
                     <input type="email" className='w-full border rounded-lg px-3 py-2 focus:outline-none ' placeholder='Enter your Email' style={{ border: `1px solid ${borderColor}` }} onChange={(e)=>setEmail(e.target.value)} value={email} required/>
                 </div>
+                
                 {/* password*/}
 
                 <div className='mb-4'>

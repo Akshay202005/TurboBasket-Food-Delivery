@@ -5,6 +5,8 @@ import User from "../models/user.model.js"
 import { sendDeliveryOtpMail } from "../utils/mail.js"
 import RazorPay from "razorpay"
 import dotenv from "dotenv"
+import { count } from "console"
+import mongoose from "mongoose"
 
 dotenv.config()
 let instance = new RazorPay({
@@ -334,7 +336,7 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getDeliveryBoyAssignment = async (req, res) => {
     try {
-        const deliveryBoyId = req.userId
+        const deliveryBoyId = new mongoose.Types.ObjectId(req.userId)
         const assignments = await DeliveryAssignment.find({
             brodcastedTo: deliveryBoyId,
             status: "brodcasted"
@@ -418,16 +420,16 @@ export const getCurrentOrder = async (req, res) => {
             })
 
         if (!assignment) {
-            return res.status(400).json({ message: "assignment not found" })
+            return res.status(200).json(null)
         }
         if (!assignment.order) {
-            return res.status(400).json({ message: "order not found" })
+            return res.status(200).json(null)
         }
 
         const shopOrder = assignment.order.shopOrders.find(so => String(so._id) == String(assignment.shopOrderId))
 
         if (!shopOrder) {
-            return res.status(400).json({ message: "shopOrder not found" })
+            return res.status(200).json(null)
         }
 
         let deliveryBoyLocation = { lat: null, lon: null }
@@ -497,6 +499,7 @@ export const sendDeliveryOtp = async (req, res) => {
         shopOrder.deliveryOtp = otp
         shopOrder.otpExpires = Date.now() + 5 * 60 * 1000
         await order.save()
+        console.log("sending mail to:", order.user.email)
         await sendDeliveryOtpMail(order.user, otp)
         return res.status(200).json({ message: `Otp sent Successfuly to ${order?.user?.fullName}` })
     } catch (error) {
@@ -532,7 +535,53 @@ export const verifyDeliveryOtp = async (req, res) => {
     }
 }
 
+export const getTodayDeliveries=async (req,res) => {
+    try {
+        const deliveryBoyId=req.userId
+        const startsOfDay=new Date()
+        startsOfDay.setHours(0,0,0,0)
 
+        const orders=await Order.find({
+           "shopOrders.assignedDeliveryBoy":deliveryBoyId,
+           "shopOrders.status":"delivered",
+           "shopOrders.deliveredAt":{$gte:startsOfDay}
+        }).lean()
+
+     let todaysDeliveries=[] 
+     
+     orders.forEach(order=>{
+        order.shopOrders.forEach(shopOrder=>{
+            if(shopOrder.assignedDeliveryBoy==deliveryBoyId &&
+                shopOrder.status=="delivered" &&
+                shopOrder.deliveredAt &&
+                shopOrder.deliveredAt>=startsOfDay
+            ){
+                todaysDeliveries.push(shopOrder)
+            }
+        })
+     })
+
+let stats={}
+
+todaysDeliveries.forEach(shopOrder=>{
+    const hour=new Date(shopOrder.deliveredAt).getHours()
+    stats[hour]=(stats[hour] || 0) + 1
+})
+
+let formattedStats=Object.keys(stats).map(hour=>({
+ hour:parseInt(hour),
+ count:stats[hour]   
+}))
+
+formattedStats.sort((a,b)=>a.hour-b.hour)
+
+return res.status(200).json(formattedStats)
+  
+
+    } catch (error) {
+        return res.status(500).json({ message: `today deliveries error ${error}` }) 
+    }
+}
 
 
 
